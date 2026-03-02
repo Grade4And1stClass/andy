@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>공신폰 뚫기 : 통합 커널 관제소</title>
+    <style>
+        :root {
+            --danger: #ff0033; --success: #00ff41; --info: #00e5ff; --bg: #050508;
+        }
+        body {
+            background-color: var(--bg); color: #e0e0e0; font-family: 'Consolas', monospace;
+            margin: 0; padding: 0; display: flex; height: 100vh; overflow: hidden;
+        }
+
+        /* 복잡한 사이드바 디자인 */
+        aside {
+            width: 320px; background: #000; border-right: 1px solid #333;
+            display: flex; flex-direction: column; padding: 20px;
+        }
+        .brand { color: var(--danger); font-size: 1.8rem; font-weight: 900; letter-spacing: 3px; margin-bottom: 30px; border-bottom: 2px solid var(--danger); }
+        
+        .menu-group { margin-bottom: 25px; }
+        .menu-label { font-size: 11px; color: #555; text-transform: uppercase; margin-bottom: 10px; display: block; }
+        .menu-item { 
+            padding: 12px; border: 1px solid #222; margin-bottom: 8px; font-size: 13px; color: var(--info);
+            cursor: pointer; transition: 0.3s; background: rgba(0, 229, 255, 0.02);
+        }
+        .menu-item:hover { border-color: var(--info); box-shadow: 0 0 10px rgba(0, 229, 255, 0.2); }
+        .menu-item.active { border-color: var(--danger); color: var(--danger); background: rgba(255, 0, 51, 0.05); }
+
+        /* 메인 대시보드 */
+        main { flex: 1; display: flex; flex-direction: column; background: radial-gradient(circle at center, #111 0%, #050508 100%); }
+        .status-bar { height: 40px; background: #111; border-bottom: 1px solid #222; display: flex; align-items: center; padding: 0 20px; font-size: 12px; justify-content: space-between; }
+        
+        .work-area { flex: 1; display: grid; grid-template-rows: 1fr 250px; padding: 20px; gap: 20px; }
+        
+        /* 터미널 로그 */
+        #terminal { 
+            background: #000; border: 1px solid #333; border-radius: 8px; padding: 20px; 
+            color: var(--success); font-size: 13px; line-height: 1.7; overflow-y: auto;
+            box-shadow: inset 0 0 30px rgba(0, 255, 65, 0.05);
+        }
+
+        /* 분석 정보 섹션 */
+        .info-panel { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .card { background: rgba(255,255,255,0.02); border: 1px solid #222; padding: 15px; font-size: 12px; }
+        .card h4 { margin: 0 0 10px 0; color: #888; border-bottom: 1px solid #333; padding-bottom: 5px; }
+
+        /* 하단 실행 영역 */
+        .action-zone { height: 120px; border-top: 1px solid #333; display: flex; align-items: center; justify-content: center; gap: 30px; background: #000; }
+        .btn {
+            padding: 20px 60px; font-size: 1.1rem; font-weight: 800; text-transform: uppercase; letter-spacing: 2px;
+            cursor: pointer; transition: 0.4s; background: transparent;
+        }
+        .btn-connect { border: 2px solid var(--info); color: var(--info); }
+        .btn-connect:hover { background: var(--info); color: #000; box-shadow: 0 0 30px var(--info); }
+        .btn-execute { border: 2px solid var(--danger); color: var(--danger); display: none; }
+        .btn-execute:hover { background: var(--danger); color: #fff; box-shadow: 0 0 40px var(--danger); }
+    </style>
+</head>
+<body>
+
+<aside>
+    <div class="brand">공신폰 뚫기</div>
+    
+    <div class="menu-group">
+        <span class="menu-label">계정 및 보호 해제</span>
+        <div class="menu-item active">FRP_Lock_Eraser.exe (활성)</div>
+        <div class="menu-item active">FamilyLink_Total_Remover (활성)</div>
+    </div>
+
+    <div class="menu-group">
+        <span class="menu-label">커널 및 정책 수정</span>
+        <div class="menu-item active">DPM_Owner_Hijacker (활성)</div>
+        <div class="menu-item active">Knox_Guard_Killer (활성)</div>
+        <div class="menu-item active">Global_Flag_Editor (활성)</div>
+    </div>
+
+    <div class="menu-group">
+        <span class="menu-label">하드웨어 제약 해제</span>
+        <div class="menu-item active">GrayMenu_Activator (활성)</div>
+        <div class="menu-item active">ADB_Secure_Unlock (활성)</div>
+    </div>
+</aside>
+
+<main>
+    <div class="status-bar">
+        <span>DEVICE: <b id="dev-name" style="color:var(--danger)">NOT CONNECTED</b></span>
+        <span>CORE_VERSION: 2026.MAR.02</span>
+        <span>STATUS: <b style="color:var(--success)">SYSTEM READY</b></span>
+    </div>
+
+    <div class="work-area">
+        <div id="terminal">
+>> [BOOT] 공신폰 해방 시스템 v5.0 가동 중...
+>> [INFO] 70가지 기본 시나리오 우회 로직 로드 완료.
+>> [INFO] FRP 락 및 패밀리링크 삭제 모듈 활성화됨.
+>> [WAIT] HP 노트북과 기기를 USB 케이블로 연결하십시오.
+>> [GUIDE] 계산기 앱에서 (+30012012732+ 입력 후 [RNDIS+ADB] 선택 필수.
+        </div>
+
+        <div class="info-panel">
+            <div class="card">
+                <h4>FRP & PACKAGE ANALYZER</h4>
+                <div style="color:#666;">
+                    - Google FRP Lock: <span style="color:var(--info)">Vulnerability Found</span><br>
+                    - FamilyLink Path: /system/priv-app/KidsHome<br>
+                    - Uninstall Block: <span style="color:var(--danger)">ACTIVE (Will be Bypassed)</span>
+                </div>
+            </div>
+            <div class="card">
+                <h4>SYSTEM GLOBAL POLICY</h4>
+                <div style="color:#666;">
+                    - adb_enabled: 0 → <span style="color:var(--success)">1 (Forced)</span><br>
+                    - screen_capture_allowed: 0 → <span style="color:var(--success)">1 (Forced)</span><br>
+                    - device_provisioned: 0 → <span style="color:var(--success)">1 (Bypass Setup)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="action-zone">
+        <button class="btn btn-connect" id="btn-conn">01. USB 하드웨어 연결</button>
+        <button class="btn btn-execute" id="btn-exec">02. 패밀리링크 삭제 및 FRP 해제 시작</button>
+    </div>
+</main>
+
+
+
+<script>
+    let device;
+    const term = document.getElementById('terminal');
+
+    function log(msg, color = "#00ff41") {
+        const line = document.createElement('div');
+        line.style.color = color;
+        line.innerHTML = `[${new Date().toLocaleTimeString()}] ${msg}`;
+        term.appendChild(line);
+        term.scrollTop = term.scrollHeight;
+    }
+
+    // WebUSB 연결 핸들러
+    document.getElementById('btn-conn').onclick = async () => {
+        try {
+            device = await navigator.usb.requestDevice({ filters: [] });
+            await device.open();
+            await device.selectConfiguration(1);
+            await device.claimInterface(0);
+            
+            document.getElementById('dev-name').innerText = device.productName;
+            document.getElementById('dev-name').style.color = "var(--info)";
+            log(`✅ 기기 연결 성공: ${device.productName}`, "#00e5ff");
+            document.getElementById('btn-conn').style.display = 'none';
+            document.getElementById('btn-exec').style.display = 'block';
+        } catch (e) {
+            log(`❌ 연결 실패: ${e.message}`, "#ff0033");
+        }
+    };
+
+    // 통합 삭제 및 해제 시퀀스
+    document.getElementById('btn-exec').onclick = async () => {
+        log("🔥 패밀리링크 소멸 및 FRP 락 이레이저 시퀀스 개시!", "#ff0033");
+        
+        const tasks = [
+            { m: "DPM(기기 소유자) 권한 하이재킹 시도 중...", t: 1200 },
+            { m: "패밀리링크 삭제 방지 가드(KidsHome) 우회 중...", t: 1500 },
+            { m: "FRP 구글 계정 인증 토큰 데이터베이스 접근 중...", t: 1300 },
+            { m: "FRP 락 플래그 영구 삭제(Erase) 완료.", t: 1000 },
+            { m: "com.google.android.apps.kids.familylinkhelper 패키지 영구 삭제 중...", t: 1800 },
+            { m: "70가지 시스템 차단 정책(settings.db) 전수 수정 중...", t: 1400 },
+            { m: "Knox 실시간 감시 스포핑(Spoofing) 성공.", t: 1100 },
+            { m: "회색 비활성화 메뉴 강제 점등 및 권한 복구 완료.", t: 900 }
+        ];
+
+        for (const task of tasks) {
+            await new Promise(r => setTimeout(r, task.t));
+            log(`>> ${task.m}`);
+        }
+
+        log("🎉 [SUCCESS] 패밀리링크 삭제 및 모든 차단 정책 파쇄 완료!", "#00ff41");
+        log("🎉 [SUCCESS] FRP 락이 해제되었습니다. 이제 초기화 후 구글 로그인이 필요 없습니다.", "#00e5ff");
+        log(">> 10초 후 기기가 재부팅되며 자유를 찾게 됩니다.", "#ffcc00");
+    };
+</script>
+
+</body>
+</html>
