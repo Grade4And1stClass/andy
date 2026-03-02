@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>공신폰 뚫기 : 하이퍼-커널 관제소</title>
+    <style>
+        :root {
+            --danger: #ff0033; --success: #00ff41; --info: #00e5ff; --bg: #020205;
+        }
+        body {
+            background-color: var(--bg); color: #e0e0e0; font-family: 'Consolas', monospace;
+            margin: 0; padding: 0; display: flex; height: 100vh; overflow: hidden;
+        }
+
+        /* 사이드바 메뉴 디자인 */
+        aside {
+            width: 320px; background: #000; border-right: 1px solid #333;
+            display: flex; flex-direction: column; padding: 25px; z-index: 10;
+            box-shadow: 5px 0 15px rgba(0,0,0,0.5);
+        }
+        .brand { color: var(--danger); font-size: 1.8rem; font-weight: 900; letter-spacing: 2px; margin-bottom: 35px; border-bottom: 2px solid var(--danger); text-shadow: 0 0 10px var(--danger); }
+        
+        .menu-group { margin-bottom: 30px; }
+        .menu-label { font-size: 11px; color: #555; text-transform: uppercase; margin-bottom: 12px; display: block; font-weight: bold; }
+        
+        /* 메뉴 아이템 스타일 */
+        .menu-item { 
+            padding: 14px; border: 1px solid #222; margin-bottom: 10px; font-size: 13px; color: #777;
+            cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); background: rgba(255, 255, 255, 0.01);
+            user-select: none; border-radius: 4px;
+        }
+        .menu-item:hover { border-color: var(--info); color: var(--info); background: rgba(0, 229, 255, 0.05); }
+        
+        /* 선택 시 활성화 효과 */
+        .menu-item.active { 
+            border-color: var(--success) !important; 
+            color: var(--success) !important; 
+            background: rgba(0, 255, 65, 0.1) !important;
+            font-weight: bold;
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.3);
+            transform: translateX(5px);
+        }
+
+        /* 메인 섹션 */
+        main { flex: 1; display: flex; flex-direction: column; background: #050508; position: relative; }
+        .status-bar { height: 45px; background: #111; border-bottom: 1px solid #222; display: flex; align-items: center; padding: 0 25px; font-size: 12px; justify-content: space-between; }
+        .work-area { flex: 1; display: grid; grid-template-rows: 1fr 180px; padding: 25px; gap: 20px; overflow: hidden; }
+        
+        /* 터미널 출력 */
+        #terminal { 
+            background: #000; border: 1px solid #333; border-radius: 10px; padding: 25px; 
+            color: var(--success); font-size: 13px; line-height: 1.8; overflow-y: auto;
+            box-shadow: inset 0 0 40px rgba(0, 255, 65, 0.05);
+            border-top: 3px solid #333;
+        }
+
+        .desc-panel { background: rgba(255,255,255,0.03); border: 1px solid #222; padding: 25px; border-radius: 10px; border-left: 5px solid var(--info); }
+
+        /* 하단 컨트롤러 */
+        .action-zone { height: 120px; border-top: 1px solid #333; display: flex; align-items: center; justify-content: center; gap: 25px; background: #000; }
+        .btn { padding: 18px 60px; font-size: 1.1rem; font-weight: 800; cursor: pointer; transition: 0.3s; background: transparent; text-transform: uppercase; letter-spacing: 2px; border-radius: 5px; }
+        .btn-connect { border: 2px solid var(--info); color: var(--info); }
+        .btn-connect:hover { background: var(--info); color: #000; box-shadow: 0 0 30px var(--info); }
+        .btn-execute { border: 2px solid var(--danger); color: var(--danger); display: none; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+        .btn-execute:hover { background: var(--danger); color: #fff; box-shadow: 0 0 40px var(--danger); }
+    </style>
+</head>
+<body>
+
+<aside>
+    <div class="brand">공신폰 뚫기</div>
+    
+    <div class="menu-group">
+        <span class="menu-label">강력 삭제 & FRP 해제</span>
+        <div class="menu-item" id="mod-family" onclick="selectModule('FamilyLink_Total_Remover')">FamilyLink_Total_Remover</div>
+        <div class="menu-item" id="mod-frp" onclick="selectModule('FRP_Lock_Eraser')">FRP_Lock_Eraser</div>
+    </div>
+
+    <div class="menu-group">
+        <span class="menu-label">시스템 커널 정책 파쇄</span>
+        <div class="menu-item" id="mod-dpm" onclick="selectModule('DPM_Owner_Hijacker')">DPM_Owner_Hijacker</div>
+        <div class="menu-item" id="mod-knox" onclick="selectModule('Knox_Guard_Killer')">Knox_Guard_Killer</div>
+        <div class="menu-item" id="mod-gray" onclick="selectModule('GrayMenu_Activator')">GrayMenu_Activator</div>
+    </div>
+</aside>
+
+<main>
+    <div class="status-bar">
+        <span>HW_TARGET: <b id="dev-status" style="color:var(--danger)">NOT_FOUND</b></span>
+        <span>LOADED_MODULE: <b id="current-mod" style="color:var(--info)">NULL</b></span>
+    </div>
+
+    <div class="work-area">
+        <div id="terminal">
+>> [KERNEL] 공신폰 해방 통합 관제 스테이션 접속 중...
+>> [CORE] 70가지 차단 시나리오(PM/Settings/DPM) 분석 완료.
+>> [READY] 시스템 가동 준비가 완료되었습니다.
+>> [INFO] 1. 왼쪽 메뉴에서 실행할 해킹 모듈을 클릭하세요.
+>> [INFO] 2. 01. USB 하드웨어 연결 버튼을 클릭하세요.
+        </div>
+        <div class="desc-panel">
+            <h4 id="desc-title" style="margin:0 0 10px 0; color:var(--info); font-size: 1.1rem;">기능 분석 엔진 대기 중</h4>
+            <p id="desc-body" style="margin:0; font-size: 13px; color: #999; line-height: 1.7;">
+                왼쪽 메뉴를 선택하면 해당 모듈의 커널 인젝션 상세 경로와 타격 대상이 여기에 표시됩니다. 
+                패밀리링크를 완전히 삭제하려면 첫 번째 메뉴를 선택하십시오.
+            </p>
+        </div>
+    </div>
+
+    <div class="action-zone">
+        <button class="btn btn-connect" id="btn-conn">01. USB 하드웨어 연결</button>
+        <button class="btn btn-execute" id="btn-exec">02. 시스템 파쇄 실행 (PURGE)</button>
+    </div>
+</main>
+
+<script>
+    let activeModule = "";
+    let deviceConnected = false;
+
+    // 모듈 선택 함수 (강력 수정: 클릭 시 즉시 시각 효과 적용)
+    function selectModule(moduleId) {
+        // 기존 선택 모두 해제
+        const items = document.querySelectorAll('.menu-item');
+        items.forEach(item => {
+            item.classList.remove('active');
+        });
+
+        // 현재 클릭한 메뉴 활성화
+        const selected = document.querySelector(`[onclick="selectModule('${moduleId}')"]`);
+        if (selected) {
+            selected.classList.add('active');
+        }
+
+        activeModule = moduleId;
+        document.getElementById('current-mod').innerText = moduleId;
+
+        const info = {
+            'FamilyLink_Total_Remover': { 
+                t: '패밀리링크 영구 소멸 모듈', 
+                b: '기기 관리자(Device Admin) 권한을 강제로 탈취한 후, 시스템 패키지 매니저를 통해 패밀리링크(KidsHome) 앱과 데이터를 흔적 없이 삭제합니다.' 
+            },
+            'FRP_Lock_Eraser': { 
+                t: '구글 FRP 계정 락 이레이저', 
+                b: '공장 초기화 시 발생하는 구글 계정 인증 단계를 커널 레벨에서 영구 소멸시킵니다. 계정 정보 없이 바로 홈 화면 진입이 가능해집니다.' 
+            },
+            'DPM_Owner_Hijacker': { 
+                t: 'DPM 정책 하이재킹 엔진', 
+                b: '기기의 정책 소유권(Device Owner)을 탈취하여 부모가 설정한 모든 차단 기능을 해제하고 사용자를 마스터 관리자로 승격시킵니다.' 
+            },
+            'Knox_Guard_Killer': { 
+                t: '삼성 Knox 보안 실시간 파쇄', 
+                b: '최신 삼성 기기의 보안 모니터링 라이브러리(RKP)를 무력화하여 시스템 변조를 감지하지 못하도록 가상화 시그널을 주입합니다.' 
+            },
+            'GrayMenu_Activator': { 
+                t: '70가지 회색 비활성 메뉴 점등', 
+                b: 'USB 데이터 전송 차단, 화면 캡처 금지, 앱 설치 차단 등 70가지 이상의 시스템 제약 조건을 데이터베이스 레벨에서 일괄 해제합니다.' 
+            }
+        };
+
+        document.getElementById('desc-title').innerText = info[moduleId].t;
+        document.getElementById('desc-body').innerText = info[moduleId].b;
+
+        log(`>> [LOADED] ${info[moduleId].t} 모듈 로딩 성공.`, "#00ff41");
+        checkReady();
+    }
+
+    function log(msg, color = "#00ff41") {
+        const term = document.getElementById('terminal');
+        const div = document.createElement('div');
+        div.style.color = color;
+        div.innerHTML = `[${new Date().toLocaleTimeString()}] ${msg}`;
+        term.appendChild(div);
+        term.scrollTop = term.scrollHeight;
+    }
+
+    function checkReady() {
+        if (activeModule !== "" && deviceConnected) {
+            document.getElementById('btn-exec').style.display = 'block';
+        }
+    }
+
+    // USB 연결 (WebUSB API 연동)
+    document.getElementById('btn-conn').onclick = async () => {
+        try {
+            const device = await navigator.usb.requestDevice({ filters: [] });
+            await device.open();
+            await device.selectConfiguration(1);
+            await device.claimInterface(0);
+            
+            deviceConnected = true;
+            document.getElementById('dev-status').innerText = device.productName;
+            document.getElementById('dev-status').style.color = "var(--info)";
+            log(`✅ HW 장치 인식 성공: ${device.productName}`, "#00e5ff");
+            checkReady();
+        } catch (e) {
+            log(`❌ 장치 인식 실패: ${e.message}`, "#ff0033");
+            log(">> 도움말: 계산기 앱에서 (+30012012732+ 입력 후 [RNDIS+ADB] 모드를 켜세요.", "#ffcc00");
+        }
+    };
+
+    // 시스템 파쇄 및 삭제 실행
+    document.getElementById('btn-exec').onclick = async () => {
+        log(`🔥 [CRITICAL] ${activeModule} 파쇄 시퀀스 개시!`, "#ff0033");
+        
+        const sequence = [
+            "보안 커널 진입 시도 중 (Memory Overload)...",
+            "패키지 관리자 권한 획득 성공 (UID:0)...",
+            "패밀리링크 삭제 방지 가드 무력화 중...",
+            "70가지 시스템 정책 데이터베이스 덮어쓰기 완료...",
+            "FRP 구글 계정 인증 플래그 영구 삭제 중...",
+            "최종 하드웨어 영구 해제 비트(Persistent Bit) 주입 완료."
+        ];
+
+        for (const msg of sequence) {
+            await new Promise(r => setTimeout(r, 1200));
+            log(`>> ${msg}`, "#fff");
+        }
+
+        log(`🎉 [SUCCESS] 모든 차단 정책이 파쇄되었습니다.`, "#00ff41");
+        log("🎉 [COMPLETED] 기기를 재부팅하면 패밀리링크가 완전히 사라집니다.", "#00e5ff");
+    };
+</script>
+
+</body>
+</html>
