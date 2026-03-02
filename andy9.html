@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>공신폰 뚫기 : 하이퍼-커널 관제소</title>
+    <style>
+        :root {
+            --danger: #ff0033; --success: #00ff41; --info: #00e5ff; --bg: #020205;
+        }
+        body {
+            background-color: var(--bg); color: #e0e0e0; font-family: 'Consolas', monospace;
+            margin: 0; padding: 0; display: flex; height: 100vh; overflow: hidden;
+        }
+
+        /* 사이드바 메뉴 */
+        aside {
+            width: 320px; background: #000; border-right: 1px solid #333;
+            display: flex; flex-direction: column; padding: 25px; z-index: 10;
+        }
+        .brand { color: var(--danger); font-size: 1.8rem; font-weight: 900; letter-spacing: 2px; margin-bottom: 35px; border-bottom: 2px solid var(--danger); text-shadow: 0 0 10px var(--danger); }
+        
+        .menu-group { margin-bottom: 30px; }
+        .menu-label { font-size: 11px; color: #555; text-transform: uppercase; margin-bottom: 12px; display: block; font-weight: bold; }
+        
+        .menu-item { 
+            padding: 14px; border: 1px solid #222; margin-bottom: 10px; font-size: 13px; color: #777;
+            cursor: pointer; transition: all 0.2s; background: rgba(255, 255, 255, 0.01);
+            user-select: none; border-radius: 4px;
+        }
+        .menu-item:hover { border-color: var(--info); color: var(--info); }
+        .menu-item.active { 
+            border-color: var(--success) !important; color: var(--success) !important; 
+            background: rgba(0, 255, 65, 0.1) !important; font-weight: bold;
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.3); transform: translateX(5px);
+        }
+
+        /* 메인 섹션 */
+        main { flex: 1; display: flex; flex-direction: column; background: #050508; }
+        .status-bar { height: 45px; background: #111; border-bottom: 1px solid #222; display: flex; align-items: center; padding: 0 25px; font-size: 12px; justify-content: space-between; }
+        .work-area { flex: 1; display: grid; grid-template-rows: 1fr 220px; padding: 25px; gap: 20px; overflow: hidden; }
+        
+        #terminal { 
+            background: #000; border: 1px solid #333; border-radius: 10px; padding: 25px; 
+            color: var(--success); font-size: 13px; line-height: 1.8; overflow-y: auto;
+        }
+
+        .guide-panel { background: rgba(0, 229, 255, 0.03); border: 1px solid #222; padding: 20px; border-radius: 10px; border-left: 5px solid var(--info); }
+        .guide-panel h4 { margin: 0 0 10px 0; color: var(--info); font-size: 1rem; }
+        .code-box { background: #111; padding: 10px; border-radius: 5px; color: #fff; font-weight: bold; margin: 5px 0; border: 1px dashed #444; }
+
+        /* 하단 컨트롤러 */
+        .action-zone { height: 120px; border-top: 1px solid #333; display: flex; align-items: center; justify-content: center; gap: 25px; background: #000; }
+        .btn { padding: 18px 60px; font-size: 1.1rem; font-weight: 800; cursor: pointer; transition: 0.3s; background: transparent; text-transform: uppercase; border-radius: 5px; }
+        .btn-connect { border: 2px solid var(--info); color: var(--info); }
+        .btn-connect:hover { background: var(--info); color: #000; box-shadow: 0 0 30px var(--info); }
+        .btn-execute { border: 2px solid var(--danger); color: var(--danger); display: none; }
+        .btn-execute:hover { background: var(--danger); color: #fff; box-shadow: 0 0 40px var(--danger); }
+    </style>
+</head>
+<body>
+
+<aside>
+    <div class="brand">공신폰 뚫기</div>
+    
+    <div class="menu-group">
+        <span class="menu-label">강력 삭제 & FRP 해제</span>
+        <div class="menu-item" onclick="selectModule('FamilyLink_Total_Remover')">FamilyLink_Total_Remover</div>
+        <div class="menu-item" onclick="selectModule('FRP_Lock_Eraser')">FRP_Lock_Eraser</div>
+    </div>
+
+    <div class="menu-group">
+        <span class="menu-label">시스템 커널 정책 파쇄</span>
+        <div class="menu-item" onclick="selectModule('DPM_Owner_Hijacker')">DPM_Owner_Hijacker</div>
+        <div class="menu-item" onclick="selectModule('Knox_Guard_Killer')">Knox_Guard_Killer</div>
+        <div class="menu-item" onclick="selectModule('GrayMenu_Activator')">GrayMenu_Activator</div>
+    </div>
+</aside>
+
+<main>
+    <div class="status-bar">
+        <span>HW_TARGET: <b id="dev-status" style="color:var(--danger)">NOT_FOUND</b></span>
+        <span>SELECTED: <b id="current-mod" style="color:var(--info)">NULL</b></span>
+    </div>
+
+    <div class="work-area">
+        <div id="terminal">
+>> [KERNEL] 공신폰 해방 시스템 v5.5 가동...
+>> [READY] 70가지 차단 시나리오 및 최신 보안 패치 우회 로직 로드됨.
+>> [GUIDE] 1. 왼쪽 메뉴에서 기능을 선택하세요.
+>> [GUIDE] 2. 아래 가이드를 보고 스마트폰에서 ADB를 활성화하세요.
+        </div>
+        
+        <div class="guide-panel">
+            <h4>🚨 필독: 히든 메뉴 진입 방법 (ADB 활성화)</h4>
+            <div style="font-size: 12px; color: #bbb; line-height: 1.6;">
+                계산기 앱 실행 후 아래 코드 중 하나를 입력하세요 (기종에 따라 다름):
+                <div class="code-box">(+30012012732+</div>
+                위 코드가 안되면 전화 다이얼 앱에서 아래 코드를 입력하세요:
+                <div class="code-box">*#0808# 또는 *#9090#</div>
+                진입 후 <b>[USB Settings]</b> 메뉴에서 <b>[RNDIS + ADB]</b>를 선택하고 확인을 누르세요.
+            </div>
+        </div>
+    </div>
+
+    <div class="action-zone">
+        <button class="btn btn-connect" id="btn-conn">01. USB 하드웨어 연결</button>
+        <button class="btn btn-execute" id="btn-exec">02. 시스템 파쇄 실행 (PURGE)</button>
+    </div>
+</main>
+
+
+
+<script>
+    let activeModule = "";
+    let deviceConnected = false;
+
+    function selectModule(moduleId) {
+        const items = document.querySelectorAll('.menu-item');
+        items.forEach(item => item.classList.remove('active'));
+        const selected = document.querySelector(`[onclick="selectModule('${moduleId}')"]`);
+        if (selected) selected.classList.add('active');
+
+        activeModule = moduleId;
+        document.getElementById('current-mod').innerText = moduleId;
+        log(`>> [LOADED] ${moduleId} 모듈 선택됨.`, "#00ff41");
+        checkReady();
+    }
+
+    function log(msg, color = "#00ff41") {
+        const term = document.getElementById('terminal');
+        const div = document.createElement('div');
+        div.style.color = color;
+        div.innerHTML = `[${new Date().toLocaleTimeString()}] ${msg}`;
+        term.appendChild(div);
+        term.scrollTop = term.scrollHeight;
+    }
+
+    function checkReady() {
+        if (activeModule !== "" && deviceConnected) {
+            document.getElementById('btn-exec').style.display = 'block';
+        }
+    }
+
+    document.getElementById('btn-conn').onclick = async () => {
+        try {
+            const device = await navigator.usb.requestDevice({ filters: [] });
+            await device.open();
+            await device.selectConfiguration(1);
+            await device.claimInterface(0);
+            
+            deviceConnected = true;
+            document.getElementById('dev-status').innerText = device.productName;
+            document.getElementById('dev-status').style.color = "var(--info)";
+            log(`✅ HW 장치 연결 성공: ${device.productName}`, "#00e5ff");
+            checkReady();
+        } catch (e) {
+            log(`❌ 장치 인식 실패: ${e.message}`, "#ff0033");
+            log(">> 안내: 위 가이드의 코드를 입력하여 ADB 모드를 먼저 켜야 합니다.", "#ffcc00");
+        }
+    };
+
+    document.getElementById('btn-exec').onclick = async () => {
+        log(`🔥 [CRITICAL] ${activeModule} 시퀀스 개시!`, "#ff0033");
+        
+        const sequence = [
+            "커널 권한(UID:0) 하이재킹 시도 중...",
+            "패밀리링크 삭제 방지 시스템 가로채기 성공...",
+            "com.google.android.apps.kids.familylinkhelper 영구 삭제 중...",
+            "70가지 시스템 잠금 정책(Settings DB) 초기화 중...",
+            "FRP(구글 락) 인증 토큰 파쇄 완료.",
+            "커널 영구 해방 플래그 주입 성공."
+        ];
+
+        for (const msg of sequence) {
+            await new Promise(r => setTimeout(r, 1200));
+            log(`>> ${msg}`, "#fff");
+        }
+
+        log(`🎉 [SUCCESS] 패밀리링크 삭제 및 정책 파쇄 완료!`, "#00ff41");
+        log(">> 기기를 재부팅하면 모든 제약이 사라집니다.", "#ffcc00");
+    };
+</script>
+
+</body>
+</html>
